@@ -1,6 +1,7 @@
 <script lang="ts">
 	import EnterAcessToken from '$lib/forms/EnterAcessToken.svelte';
 	import Fleet from '$lib/readouts/Fleet.svelte';
+	import System from '$lib/readouts/System.svelte';
 	import { accessToken } from '$lib/stores';
 	import { onMount } from 'svelte';
 
@@ -10,12 +11,11 @@
 	});
 </script>
 
-<div class="container mx-auto flex h-full items-center justify-center">
-	<div class="container space-y-5">
-		{#if isMounted && $accessToken == ''}
-			<EnterAcessToken />
-		{/if}
-        <Fleet />
-	</div>
+<div class="container space-y-4 p-4">
+    {#if isMounted && $accessToken == ''}
+        <EnterAcessToken />
+    {/if}
+    <Fleet />
+    <System />
 </div>
 
