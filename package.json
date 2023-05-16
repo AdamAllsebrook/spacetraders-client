@@ -20,6 +20,7 @@
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.5.0",
 		"@tailwindcss/forms": "^0.5.3",
+		"@types/d3": "^7.4.0",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
 		"autoprefixer": "^10.4.14",
@@ -41,6 +42,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@openapitools/openapi-generator-cli": "^2.6.0"
+		"@openapitools/openapi-generator-cli": "^2.6.0",
+		"d3": "^7.8.4"
 	}
 }
