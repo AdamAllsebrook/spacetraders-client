@@ -15,10 +15,12 @@
 
 	export let bounds: Box;
     export let graph: Writable<SystemGraph>;
+    export let reset: boolean;
 
 	let simulation: any;
 	let nodes: Array<ForceNode>;
-	onMount(() => {
+
+    function doSimulation() {
         nodes = [];
         $graph.forEach((node) => {
             nodes.push({
@@ -61,5 +63,10 @@
                     return graph;
                 });
 			});
-	});
+    }
+
+	onMount(() => {
+        doSimulation();
+    });
+    $: reset, doSimulation();
 </script>

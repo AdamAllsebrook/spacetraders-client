@@ -17,6 +17,7 @@
 	let waypoints: Array<TWaypoint> = [];
     let ships: Array<Ship> = [];
     let graph = writable(new SystemGraph({ x: d3.scaleLinear(), y: d3.scaleLinear() }));
+    let reset = false;
     $: scale = {
         x: d3
             .scaleLinear()
@@ -30,9 +31,10 @@
     $: scale, initGraph();
 
     function initGraph() {
-        graph = writable(new SystemGraph(scale));
+        graph.set(new SystemGraph(scale));
         $graph.addWaypoints(waypoints);
         $graph.addShips(ships);
+        reset = !reset;
     }
 
 	onMount(async () => {
@@ -68,5 +70,5 @@
 	{/if}
 </g>
 {#if $graph.graph.length > 0 }
-	<ForceSimulation {bounds} bind:graph />
+	<ForceSimulation {bounds} bind:graph {reset} />
 {/if}
