@@ -1,13 +1,12 @@
 <script lang="ts">
-    import { popups } from '$lib/stores';
-	import { onMount } from 'svelte';
-
-    let container: HTMLDivElement;
+    import { popups, mode } from '$lib/stores';
 
 </script>
 
 <div class='absolute left-0 top-0'>
-    {#each Array.from($popups.popups.values()) as {component, props}}
-        <svelte:component this={component} {...props} />
-    {/each}
+    {#if $mode.mode === 'normal'}
+        {#each Array.from($popups.popups.values()) as {component, props}}
+            <svelte:component this={component} {...props} />
+        {/each}
+    {/if}
 </div>

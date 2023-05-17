@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { Ship } from '$api';
 	import { FleetApi } from '$api';
-	import { config, popups } from '$lib/stores';
+	import { config, popups, mode } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { toastStore } from '@skeletonlabs/skeleton';
 	import Floating from '$lib/components/Floating.svelte';
 	import Fleet from './Fleet.svelte';
+	import { stripWaypoint } from '$lib/utils';
 
 	export let ship: Ship | string;
     export let anchor: HTMLElement | SVGElement;
@@ -51,6 +52,21 @@
 		toastStore.trigger({ message: 'Cargo sold' });
 	}
 
+    function navigate() {
+        $mode = {
+            mode: 'selectWaypoint',
+            callback: async (waypoint: string) => {
+                $mode = { mode: 'normal' };
+                let fleetApi = new FleetApi($config);
+                let response = await fleetApi.navigateShip(data.symbol, {waypointSymbol: waypoint});
+                if (response.data) {
+                    data.nav = response.data.nav;
+                    toastStore.trigger({ message: `${data.symbol} ${data.nav.flightMode} to ${stripWaypoint(data.nav.route.destination.symbol)}` });
+                }
+            }
+        };
+    }
+
     function closePopup() {
         popups.update((p) => {
             p.remove(data.symbol);
@@ -80,6 +96,7 @@
             {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
                 <button class="btn variant-filled" on:click={sellAll}>Sell All</button>
             {/if}
+            <button class='btn variant-filled' on:click={navigate}>Move</button>
             <button class='btn variant-filled' on:click={closePopup}>Close</button>
         </div>
     </Floating>

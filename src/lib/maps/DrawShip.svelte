@@ -3,12 +3,13 @@
 	import Label from './Label.svelte';
 	import type { SystemNode } from './systemGraph';
     import Ship from '$lib/readouts/Ship.svelte';
-    import { popups } from '$lib/stores';
+    import { popups, mode } from '$lib/stores';
 
 	export let ship: SystemNode<TShip>;
     let anchor: SVGCircleElement;
 
     function showPopup() {
+        if ($mode.mode !== 'normal') return;
         popups.update((p) => {
             p.add(
                 ship.data.symbol,
