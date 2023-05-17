@@ -3,8 +3,7 @@
 	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
 	import type { Writable } from 'svelte/store';
-    import type { GraphWaypoint } from './systemGraph';
-	import { afterUpdate } from 'svelte';
+    import type { SystemGraph } from './systemGraph';
 
 	type ForceNode = {
 		id: any;
@@ -15,26 +14,24 @@
 	};
 
 	export let bounds: Box;
-    export let graph: Writable<Array<GraphWaypoint>>;
+    export let graph: Writable<SystemGraph>;
 
 	let simulation: any;
 	let nodes: Array<ForceNode>;
 	onMount(() => {
         nodes = [];
         $graph.forEach((node) => {
-            [node, ...node.orbitals].forEach((waypoint) => {
-                nodes.push({
-                    id: waypoint.waypoint.symbol,
-                    x: waypoint.x,
-                    y: waypoint.y,
-                });
-                nodes.push({
-                    id: waypoint.waypoint.symbol + 'fixed',
-                    x: waypoint.x,
-                    y: waypoint.y,
-                    fx: waypoint.x,
-                    fy: waypoint.y,
-                });
+            nodes.push({
+                id: node.data.symbol,
+                x: node.x,
+                y: node.y,
+            });
+            nodes.push({
+                id: node.data.symbol + 'fixed',
+                x: node.x,
+                y: node.y,
+                fx: node.x,
+                fy: node.y,
             });
         });
         let links = [...Array(nodes.length / 2).keys()].map((i) => {
@@ -53,13 +50,9 @@
 			.on('tick', () => {
                 let index = Object.fromEntries(nodes.map((x) => [x.id, x]));
                 graph.update((graph) => {
-                    graph.forEach((node) => {
-                        node.label.x = index[node.waypoint.symbol].x;
-                        node.label.y = index[node.waypoint.symbol].y;
-                        node.orbitals.forEach((orbital) => {
-                            orbital.label.x = index[orbital.waypoint.symbol].x;
-                            orbital.label.y = index[orbital.waypoint.symbol].y;
-                        });
+                    $graph.forEach((node) => {
+                        node.label.x = index[node.data.symbol].x;
+                        node.label.y = index[node.data.symbol].y;
                     });
                     return graph;
                 });

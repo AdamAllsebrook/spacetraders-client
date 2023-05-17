@@ -1,44 +1,87 @@
-import type { Waypoint as TWaypoint } from "$api";
+import type { Waypoint, Ship } from "$api";
 
-export type GraphWaypoint = { waypoint: TWaypoint, x: number, y: number, orbitals: Array<GraphWaypoint>, label: { x: number, y: number } };
 
-const orbitalDistance = 24;
-const orbitalTheta = Math.PI / 3;
-const orbitalThetaOffset = 0;
+export type SystemData = Waypoint | Ship;
+export type SystemNode<T = SystemData> = { data: T, x: number, y: number, orbitals: Array<SystemNode>, label: { x: number, y: number } };
 
-export function systemGraph(waypoints: Array<TWaypoint>, scale: any): Array<GraphWaypoint> {
-    const symbolIndex = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, waypoint]));
-    const isOrbital = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, false]));
-    waypoints.forEach((waypoint) => {
-        waypoint.orbitals.forEach((orbital) => {
-            isOrbital[orbital.symbol] = true;
-        });
-    });
-    let renderData: Array<GraphWaypoint> = [];
-    waypoints.forEach((waypoint) => {
-        if (isOrbital[waypoint.symbol]) {
-            return;
+
+export class SystemGraph {
+    orbitalDistance = 24;
+    orbitalTheta = Math.PI / 3;
+    orbitalThetaOffset = 0;
+
+    scale: { x: any, y: any }
+    graph: Array<SystemNode>;
+    index: Map<string, SystemNode>;
+
+    constructor(scale: any) {
+        this.scale = scale;
+        this.graph = [];
+        this.index = new Map();
+    }
+
+    createNode(node: SystemNode, push?: boolean) {
+        this.index.set(node.data.symbol, node);
+        if (push) {
+            this.graph.push(node);
         }
-        const orbitals = waypoint.orbitals.map((orbital, i) => {
-            let x = scale.x(waypoint.x) + orbitalDistance * Math.cos(orbitalTheta * i + orbitalThetaOffset);
-            let y = scale.y(waypoint.y) + orbitalDistance * Math.sin(orbitalTheta * i + orbitalThetaOffset);
-            return {
-                waypoint: symbolIndex[orbital.symbol],
+        return node;
+    }
+
+    addWaypoints(waypoints: Array<Waypoint>) {
+        const symbolIndex = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, waypoint]));
+        const isOrbital = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, false]));
+        waypoints.forEach((waypoint) => {
+            waypoint.orbitals.forEach((orbital) => {
+                isOrbital[orbital.symbol] = true;
+            });
+        });
+        waypoints.forEach((waypoint) => {
+            if (isOrbital[waypoint.symbol]) {
+                return;
+            }
+            const orbitals = waypoint.orbitals.map((orbital, i) => {
+                let x = this.scale.x(waypoint.x) + this.orbitalDistance * Math.cos(this.orbitalTheta * i + this.orbitalThetaOffset);
+                let y = this.scale.y(waypoint.y) + this.orbitalDistance * Math.sin(this.orbitalTheta * i + this.orbitalThetaOffset);
+                return this.createNode({
+                    data: symbolIndex[orbital.symbol],
+                    x,
+                    y,
+                    orbitals: [],
+                    label: { x, y },
+                });
+            });
+            let x = this.scale.x(waypoint.x);
+            let y = this.scale.y(waypoint.y);
+            this.createNode({
+                data: waypoint,
                 x,
                 y,
-                orbitals: [],
+                orbitals,
                 label: { x, y },
-            };
+            }, true);
         });
-        let x = scale.x(waypoint.x);
-        let y = scale.y(waypoint.y);
-        renderData.push({
-            waypoint,
-            x,
-            y,
-            orbitals,
-            label: { x, y },
+    }
+
+    addShips(ships: Array<Ship>) {
+        ships.forEach((ship) => {
+            const parent = this.index.get(ship.nav.waypointSymbol);
+            if (!parent) {
+                return;
+            }
+            const node = this.createNode({
+                data: ship,
+                x: parent.x + 10,
+                y: parent.y + 10,
+                orbitals: [],
+                label: { x: parent.x + 10, y: parent.y + 10 },
+            });
+            parent.orbitals.push(node);
         });
-    });
-    return renderData;
+    }
+
+    forEach(callback: (node: SystemNode) => void) {
+        this.index.forEach(callback);
+    }
 }
+

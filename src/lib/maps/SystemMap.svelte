@@ -1,21 +1,22 @@
 <script lang="ts">
-	import { SystemsApi, type System, AgentsApi, FleetApi, type Waypoint as TWaypoint } from '$api';
+	import { SystemsApi, type System, AgentsApi, FleetApi, type Waypoint as TWaypoint, type Ship } from '$api';
 	import { config } from '$lib/stores';
-	import { stripSystem, stripWaypoint, type Box } from '$lib/utils';
+	import { stripSystem, type Box } from '$lib/utils';
 	import { SYSTEM_MAX_X, SYSTEM_MAX_Y } from '$lib/constants';
 	/* ts-ignore */
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
-	import Label from './Label.svelte';
 	import ForceSimulation from './ForceSimulation.svelte';
-    import Waypoint from './Waypoint.svelte';
-	import { writable, type Writable } from 'svelte/store';
-    import { type GraphWaypoint, systemGraph } from './systemGraph'
+	import { writable } from 'svelte/store';
+    import {  SystemGraph } from './systemGraph'
+	import DrawNode from './DrawNode.svelte';
 
 	export let system: System | string | null = null;
 	export let bounds: Box;
-	let data: Array<TWaypoint> = [];
-    let graph: Writable<Array<GraphWaypoint>> = writable([]);
+
+	let waypoints: Array<TWaypoint> = [];
+    let ships: Array<Ship> = [];
+    let graph = writable(new SystemGraph({ x: d3.scaleLinear(), y: d3.scaleLinear() }));
     $: scale = {
         x: d3
             .scaleLinear()
@@ -26,6 +27,14 @@
             .domain([-SYSTEM_MAX_Y, SYSTEM_MAX_Y])
             .range([bounds.top, bounds.bottom])
     };
+    $: scale, initGraph();
+
+    function initGraph() {
+        graph = writable(new SystemGraph(scale));
+        $graph.addWaypoints(waypoints);
+        $graph.addShips(ships);
+    }
+
 	onMount(async () => {
 		if (system === null) {
 			const agentsApi = new AgentsApi($config);
@@ -37,9 +46,13 @@
         }
         const systemsApi = new SystemsApi($config);
         const response = await systemsApi.getSystemWaypoints(system);
-        data = response.data;
-        graph = writable(systemGraph(data, scale));
+        waypoints = response.data;
 
+        const fleetApi = new FleetApi($config);
+        const fleetResponse = await fleetApi.getMyShips();
+        ships = fleetResponse.data;
+
+        initGraph();
 	});
 </script>
 
@@ -49,11 +62,11 @@
 
 <g filter="url(#radar)">
 	{#if $graph}
-		{#each $graph as waypoint}
-			<Waypoint {waypoint} />
+		{#each $graph.graph as node}
+			<DrawNode {node} />
 		{/each}
 	{/if}
 </g>
-{#if $graph.length > 0 }
+{#if $graph.graph.length > 0 }
 	<ForceSimulation {bounds} bind:graph />
 {/if}
