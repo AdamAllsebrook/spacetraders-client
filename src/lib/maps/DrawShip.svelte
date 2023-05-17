@@ -6,7 +6,6 @@
     import { popups } from '$lib/stores';
 
 	export let ship: SystemNode<TShip>;
-	let hover = false;
     let anchor: SVGCircleElement;
 
     function showPopup() {
@@ -37,14 +36,10 @@
 <circle
 	cx={ship.x}
 	cy={ship.y}
-	r={hover ? 6 : 5}
+	r={5}
 	fill="red"
     class="cursor-pointer"
     bind:this={anchor}
-	on:mouseover={() => (hover = true)}
-	on:focus={() => (hover = true)}
-	on:mouseout={() => (hover = false)}
-	on:blur={() => (hover = false)}
     on:click={showPopup}
     on:keydown={(e) => {
         if (e.key === 'Enter') showPopup();
