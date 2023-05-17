@@ -1,5 +1,6 @@
 <script lang="ts">
-	import EnterAcessToken from '$lib/forms/EnterAcessToken.svelte';
+	import PopupsContainer from '$lib/components/PopupsContainer.svelte';
+import EnterAcessToken from '$lib/forms/EnterAcessToken.svelte';
 	import SystemMap from '$lib/maps/SystemMap.svelte';
 	import Fleet from '$lib/readouts/Fleet.svelte';
 	import System from '$lib/readouts/System.svelte';
@@ -29,4 +30,4 @@
 <svg width={bounds.right - bounds.left} height={bounds.bottom - bounds.top}>
     <SystemMap {bounds} />
 </svg>
-<div id="popupContainer" class='absolute left-0 top-0' />
+<PopupsContainer />

@@ -10,7 +10,7 @@
     $: dir = pos.x < anchor.x ? 'left' : 'right';
 </script>
 
-<g bind:this={el}>
+<g bind:this={el} on:click on:keydown class='cursor-pointer'>
     {#each texts as text, i}
         <text x={pos.x} y={pos.y + i * 20} text-anchor={dir == 'left' ? 'end' : 'start'} font-size="1em" fill="white">{text}</text>
     {/each}

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { Ship } from '$api';
 	import { FleetApi } from '$api';
-	import { config } from '$lib/stores';
+	import { config, popups } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { toastStore } from '@skeletonlabs/skeleton';
 	import Floating from '$lib/components/Floating.svelte';
 	import Fleet from './Fleet.svelte';
 
 	export let ship: Ship | string;
-    export let pos: { x: number; y: number };
+    export let anchor: HTMLElement | SVGElement;
 	let data: Ship;
 
 	onMount(async () => {
@@ -50,10 +50,17 @@
 		}
 		toastStore.trigger({ message: 'Cargo sold' });
 	}
+
+    function closePopup() {
+        popups.update((p) => {
+            p.remove(data.symbol);
+            return p;
+        });
+    }
 </script>
 
 {#if data}
-    <Floating {pos}>
+    <Floating {anchor}>
         <div class="card space-y-5 p-4">
             <h4 class="card-title">{data.registration.name}</h4>
             <p>{data.registration.role}</p>
@@ -73,6 +80,7 @@
             {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
                 <button class="btn variant-filled" on:click={sellAll}>Sell All</button>
             {/if}
+            <button class='btn variant-filled' on:click={closePopup}>Close</button>
         </div>
     </Floating>
 {/if}
