@@ -17,8 +17,7 @@
     cx={waypoint.x} 
     cy={waypoint.y} 
     r={5 + waypoint.orbitals.length} 
-    fill="white" 
-    class="cursor-pointer"
+    class="cursor-pointer fill-secondary-50"
     on:click={select} 
     on:keydown={(e) => {
         if (e.key === 'Enter') select();

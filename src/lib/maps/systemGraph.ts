@@ -56,7 +56,7 @@ export class SystemGraph {
                     y,
                     orbitals: [],
                     label: { x, y },
-                    fixed: false,
+                    fixed: true,
                 });
             });
             let x = this.scale.x(waypoint.x);
@@ -78,8 +78,8 @@ export class SystemGraph {
             if (!parent) {
                 return;
             }
-            const x = parent.x + this.orbitalDistance;
-            const y = parent.y + this.orbitalDistance;
+            const x = parent.x;// + this.orbitalDistance;
+            const y = parent.y;// + this.orbitalDistance;
             const node = this.createNode({
                 data: ship,
                 x: x,
