@@ -2,11 +2,18 @@ import type { Waypoint, Ship } from "$api";
 
 
 export type SystemData = Waypoint | Ship;
-export type SystemNode<T = SystemData> = { data: T, x: number, y: number, orbitals: Array<SystemNode>, label: { x: number, y: number } };
+export type SystemNode<T = SystemData> = {
+    data: T,
+    x: number,
+    y: number,
+    orbitals: Array<SystemNode>,
+    label: { x: number, y: number },
+    fixed: boolean
+};
 
 
 export class SystemGraph {
-    orbitalDistance = 24;
+    orbitalDistance = 40;
     orbitalTheta = Math.PI / 3;
     orbitalThetaOffset = 0;
 
@@ -49,6 +56,7 @@ export class SystemGraph {
                     y,
                     orbitals: [],
                     label: { x, y },
+                    fixed: false,
                 });
             });
             let x = this.scale.x(waypoint.x);
@@ -59,6 +67,7 @@ export class SystemGraph {
                 y,
                 orbitals,
                 label: { x, y },
+                fixed: true,
             }, true);
         });
     }
@@ -69,12 +78,15 @@ export class SystemGraph {
             if (!parent) {
                 return;
             }
+            const x = parent.x + this.orbitalDistance;
+            const y = parent.y + this.orbitalDistance;
             const node = this.createNode({
                 data: ship,
-                x: parent.x + 10,
-                y: parent.y + 10,
+                x: x,
+                y: y,
                 orbitals: [],
-                label: { x: parent.x + 10, y: parent.y + 10 },
+                label: { x: x, y: y },
+                fixed: false,
             });
             parent.orbitals.push(node);
         });

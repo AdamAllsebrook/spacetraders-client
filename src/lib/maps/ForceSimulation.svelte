@@ -22,14 +22,16 @@
         nodes = [];
         $graph.forEach((node) => {
             nodes.push({
-                id: node.data.symbol,
+                id: node.data.symbol + '-label',
                 x: node.x,
                 y: node.y,
             });
             nodes.push({
-                id: node.data.symbol + 'fixed',
+                id: node.data.symbol,
                 x: node.x,
                 y: node.y,
+                // fx: node.fixed ? node.x : undefined,
+                // fy: node.fixed ? node.y : undefined,
                 fx: node.x,
                 fy: node.y,
             });
@@ -51,8 +53,10 @@
                 let index = Object.fromEntries(nodes.map((x) => [x.id, x]));
                 graph.update((graph) => {
                     $graph.forEach((node) => {
-                        node.label.x = index[node.data.symbol].x;
-                        node.label.y = index[node.data.symbol].y;
+                        // node.x = index[node.data.symbol].x;
+                        // node.y = index[node.data.symbol].y;
+                        node.label.x = index[node.data.symbol + '-label'].x;
+                        node.label.y = index[node.data.symbol + '-label'].y;
                     });
                     return graph;
                 });

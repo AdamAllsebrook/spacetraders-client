@@ -8,5 +8,5 @@
     export let waypoint: SystemNode<Waypoint>;
 </script>
 
-<circle cx={waypoint.x} cy={waypoint.y} r={5} fill="white" />
+<circle cx={waypoint.x} cy={waypoint.y} r={5 + waypoint.orbitals.length} fill="white" />
 <Label anchor={waypoint} pos={waypoint.label} texts={[`${waypoint.data.type} // ${stripWaypoint(waypoint.data.symbol)}`]} />

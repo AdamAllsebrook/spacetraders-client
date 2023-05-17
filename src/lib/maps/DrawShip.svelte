@@ -7,5 +7,5 @@
     export let ship: SystemNode<Ship>;
 </script>
 
-<Label anchor={ship} pos={ship.label} texts={[`${ship.data.symbol} // ${stripWaypoint(ship.data.nav.waypointSymbol)}`]} />
+<Label anchor={ship} pos={ship.label} texts={[`${ship.data.symbol} // ${ship.data.nav.status}`]} />
 <circle cx={ship.x} cy={ship.y} r={5} fill="red" />
