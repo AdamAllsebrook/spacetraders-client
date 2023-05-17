@@ -29,3 +29,4 @@
 <svg width={bounds.right - bounds.left} height={bounds.bottom - bounds.top}>
     <SystemMap {bounds} />
 </svg>
+<div id="popupContainer" class='absolute left-0 top-0' />

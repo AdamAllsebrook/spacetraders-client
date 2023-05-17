@@ -4,8 +4,11 @@
 	import { config } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { toastStore } from '@skeletonlabs/skeleton';
+	import Floating from '$lib/components/Floating.svelte';
+	import Fleet from './Fleet.svelte';
 
 	export let ship: Ship | string;
+    export let pos: { x: number; y: number };
 	let data: Ship;
 
 	onMount(async () => {
@@ -50,24 +53,26 @@
 </script>
 
 {#if data}
-	<div class="card space-y-5 p-4">
-		<h4 class="card-title">{data.registration.name}</h4>
-		<p>{data.registration.role}</p>
-		<p>{data.nav.status} at {data.nav.waypointSymbol}</p>
+    <Floating {pos}>
+        <div class="card space-y-5 p-4">
+            <h4 class="card-title">{data.registration.name}</h4>
+            <p>{data.registration.role}</p>
+            <p>{data.nav.status} at {data.nav.waypointSymbol}</p>
 
-		<p>Cargo</p>
-		{#each data.cargo.inventory as item}
-			<p>{item.name}: {item.units}</p>
-		{/each}
+            <p>Cargo</p>
+            {#each data.cargo.inventory as item}
+                <p>{item.name}: {item.units}</p>
+            {/each}
 
-		<button class="btn variant-filled" on:click={extract}>
-            Extract
-        </button>
-		{#if data.nav.status !== 'DOCKED'}
-			<button class="btn variant-filled" on:click={dock}>Dock</button>
-		{/if}
-		{#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
-			<button class="btn variant-filled" on:click={sellAll}>Sell All</button>
-		{/if}
-	</div>
+            <button class="btn variant-filled" on:click={extract}>
+                Extract
+            </button>
+            {#if data.nav.status !== 'DOCKED'}
+                <button class="btn variant-filled" on:click={dock}>Dock</button>
+            {/if}
+            {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
+                <button class="btn variant-filled" on:click={sellAll}>Sell All</button>
+            {/if}
+        </div>
+    </Floating>
 {/if}
