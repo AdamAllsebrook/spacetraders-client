@@ -18,3 +18,4 @@ accessToken.subscribe((value) => {
 
 export const popups: Writable<Popups> = writable(new Popups());
 export const mode: Writable<AllModes> = writable({ mode: 'normal' });
+export const resetMap: Writable<() => void> = writable(() => { });

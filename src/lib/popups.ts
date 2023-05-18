@@ -25,4 +25,8 @@ export class Popups {
     remove(name: string) {
         this.popups.delete(name);
     }
+
+    clear() {
+        this.popups.clear();
+    }
 }

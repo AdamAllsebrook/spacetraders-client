@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { SystemsApi, type System, AgentsApi, FleetApi, type Waypoint as TWaypoint, type Ship } from '$api';
-	import { config } from '$lib/stores';
+	import { config, resetMap } from '$lib/stores';
 	import { stripSystem, type Box } from '$lib/utils';
 	import { SYSTEM_MAX_X, SYSTEM_MAX_Y } from '$lib/constants';
 	/* ts-ignore */
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
-	import ForceSimulation from './ForceSimulation.svelte';
 	import { writable } from 'svelte/store';
     import {  SystemGraph } from './systemGraph'
+    import { ForceSimulation } from './forceSimulation';
 	import DrawNode from './DrawNode.svelte';
 
 	export let system: System | string | null = null;
@@ -17,7 +17,6 @@
 	let waypoints: Array<TWaypoint> = [];
     let ships: Array<Ship> = [];
     let graph = writable(new SystemGraph({ x: d3.scaleLinear(), y: d3.scaleLinear() }));
-    let reset = false;
     $: scale = {
         x: d3
             .scaleLinear()
@@ -29,12 +28,13 @@
             .range([bounds.top, bounds.bottom])
     };
     $: scale, initGraph();
+    let simulation;
 
     function initGraph() {
         graph.set(new SystemGraph(scale));
         $graph.addWaypoints(waypoints);
         $graph.addShips(ships);
-        reset = !reset;
+        simulation = new ForceSimulation(graph);
     }
 
 	onMount(async () => {
@@ -55,11 +55,12 @@
         ships = fleetResponse.data;
 
         initGraph();
+        $resetMap = initGraph;
 	});
 </script>
 
 <filter id="radar">
-	<feGaussianBlur stdDeviation="0.5" />
+	<feGaussianBlur stdDeviation="0.2" />
 </filter>
 
 <g filter="url(#radar)">
@@ -69,6 +70,3 @@
 		{/each}
 	{/if}
 </g>
-{#if $graph.graph.length > 0 }
-	<ForceSimulation {bounds} bind:graph {reset} />
-{/if}

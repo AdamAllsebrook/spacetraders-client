@@ -78,17 +78,44 @@ export class SystemGraph {
             if (!parent) {
                 return;
             }
-            const x = parent.x;// + this.orbitalDistance;
-            const y = parent.y;// + this.orbitalDistance;
-            const node = this.createNode({
-                data: ship,
-                x: x,
-                y: y,
-                orbitals: [],
-                label: { x: x, y: y },
-                fixed: false,
-            });
-            parent.orbitals.push(node);
+
+            if (ship.nav.status === 'IN_TRANSIT' && ship.nav.route.departure.systemSymbol === ship.nav.route.destination.systemSymbol) {
+                const dep = this.index.get(ship.nav.route.departure.symbol);
+                const dest = this.index.get(ship.nav.route.destination.symbol);
+                if (!dep || !dest) return;
+                ship.nav.route.departure.x = dep.x;
+                ship.nav.route.departure.y = dep.y;
+                ship.nav.route.destination.x = dest.x;
+                ship.nav.route.destination.y = dest.y;
+                const x = (dep.x + dest.x) / 2;
+                const y = (dep.y + dest.y) / 2;
+                // const total = Date.parse(ship.nav.route.arrival) - Date.parse(ship.nav.route.departureTime);
+                // const t = (Date.parse(ship.nav.route.arrival) - Date.now()) / total;
+                // const tx = tweened((dest.x - dep.x) * t + dep.x, { duration: (1 - t) * total });
+                // const ty = tweened((dest.y - dep.y) * t + dep.y, { duration: (1 - t) * total });
+                const node = this.createNode({
+                    data: ship,
+                    x: x,
+                    y: y,
+                    orbitals: [],
+                    label: { x: x, y: y },
+                    fixed: true,
+                });
+                this.graph.push(node);
+            }
+            else {
+                const x = parent.x;// + this.orbitalDistance;
+                const y = parent.y;// + this.orbitalDistance;
+                const node = this.createNode({
+                    data: ship,
+                    x: x,
+                    y: y,
+                    orbitals: [],
+                    label: { x: x, y: y },
+                    fixed: false,
+                });
+                parent.orbitals.push(node);
+            }
         });
     }
 

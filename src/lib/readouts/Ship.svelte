@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Ship } from '$api';
 	import { FleetApi } from '$api';
-	import { config, popups, mode } from '$lib/stores';
+	import { config, popups, mode, resetMap } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { toastStore } from '@skeletonlabs/skeleton';
 	import Floating from '$lib/components/Floating.svelte';
@@ -53,6 +53,7 @@
 	}
 
     function navigate() {
+        $popups.clear();
         $mode = {
             mode: 'selectWaypoint',
             callback: async (waypoint: string) => {
@@ -62,6 +63,7 @@
                 if (response.data) {
                     data.nav = response.data.nav;
                     toastStore.trigger({ message: `${data.symbol} ${data.nav.flightMode} to ${stripWaypoint(data.nav.route.destination.symbol)}` });
+                    $resetMap();
                 }
             }
         };
