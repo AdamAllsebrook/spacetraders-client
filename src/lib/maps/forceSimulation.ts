@@ -16,24 +16,32 @@ export class ForceSimulation {
     graph: Writable<SystemGraph>;
     nodes: Array<ForceNode>;
     links: Array<{ source: number; target: number }>;
-    index: Record<string, SystemNode>;
+    index: Record<string, ForceNode>;
 
     nLabelNodes = 3;
     labelNodeWidth = 25;
 
-    constructor(graph: Writable<SystemGraph>) {
-        this.graph = graph;
+    constructor() {
+        this.simulation = d3.forceSimulation()
+        this.graph = {} as Writable<SystemGraph>;
         this.nodes = [];
-        get(this.graph).forEach((node) => this.addNode(node));
-        this.links = [...Array(this.nodes.length / (2 + this.nLabelNodes * 2)).keys()].map((i) => {
-            return {
-                source: i * 2,
-                target: i * 2 + 1,
-            };
-        });
+        this.links = [];
+        this.index = {};
+    }
 
-        this.index = Object.fromEntries(this.nodes.map((x) => [x.id, x]));
-        this.simulation = d3.forceSimulation(this.nodes) //make ts happy
+    clear() {
+        this.simulation = d3.forceSimulation()
+        this.graph = {} as Writable<SystemGraph>;
+        this.nodes = [];
+        this.links = [];
+        this.index = {};
+    }
+
+
+    init(graph: Writable<SystemGraph>) {
+        this.clear();
+        this.graph = graph;
+        get(this.graph).forEach((node) => this.addNode(node));
         this.createSimulation();
     }
 
@@ -65,28 +73,55 @@ export class ForceSimulation {
         });
     }
 
+    nodeClusterSize() {
+        return 2 + this.nLabelNodes * 2;
+    }
+
     addNode(node: SystemNode) {
-        this.nodes.push({
-            id: node.data.symbol + '-label',
-            x: node.x,
-            y: node.y,
+        this.links.push({
+            source: this.nodes.length + 1,
+            target: this.nodes.length,
         });
-        this.nodes.push({
+        this.addNodePart({
             id: node.data.symbol,
             x: node.x,
             y: node.y,
             fx: node.fixed ? node.x : undefined,
             fy: node.fixed ? node.y : undefined,
         });
+        this.addNodePart({
+            id: node.data.symbol + '-label',
+            x: node.x,
+            y: node.y,
+        });
         // Add some relative nodes to the label to account for some width
         for (let i = -this.nLabelNodes; i <= this.nLabelNodes; i++) {
             if (i === 0) continue;
-            this.nodes.push({
+            this.addNodePart({
                 id: node.data.symbol + '-label-' + i,
                 x: node.x + i * this.labelNodeWidth,
                 y: node.y,
             });
         }
+    }
+
+    private addNodePart(node: ForceNode) {
+        this.nodes.push(node);
+        this.index[node.id] = node;
+    }
+
+    removeNode(node: SystemNode) {
+        if (this.index[node.data.symbol] === undefined) return;
+        const index = this.nodes.findIndex((x) => x.id === node.data.symbol);
+        this.links.splice(index / this.nodeClusterSize(), 1);
+        this.nodes.splice(index, this.nodeClusterSize());
+    }
+
+    updateNode(node: SystemNode) {
+        if (this.index[node.data.symbol] === undefined) return;
+        this.removeNode(node);
+        this.addNode(node);
+        this.createSimulation();
     }
 
     reset() {

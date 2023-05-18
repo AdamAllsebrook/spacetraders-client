@@ -10,6 +10,7 @@
     import {  SystemGraph } from './systemGraph'
     import { ForceSimulation } from './forceSimulation';
 	import DrawNode from './DrawNode.svelte';
+    import { setContext } from 'svelte';
 
 	export let system: System | string | null = null;
 	export let bounds: Box;
@@ -27,15 +28,17 @@
             .domain([-SYSTEM_MAX_Y, SYSTEM_MAX_Y])
             .range([bounds.top, bounds.bottom])
     };
-    $: scale, initGraph();
-    let simulation;
+    $: scale, $resetMap();
+    const simulation = new ForceSimulation();
+    setContext('system-simulation', simulation);
+    setContext('system-graph', graph);
 
-    function initGraph() {
+    function init() {
         graph.set(new SystemGraph(scale));
         $graph.addWaypoints(waypoints);
         $graph.addShips(ships);
-        simulation = new ForceSimulation(graph);
-    }
+        simulation.init(graph);
+   } 
 
 	onMount(async () => {
 		if (system === null) {
@@ -54,8 +57,7 @@
         const fleetResponse = await fleetApi.getMyShips();
         ships = fleetResponse.data;
 
-        initGraph();
-        $resetMap = initGraph;
+        $resetMap = init;
 	});
 </script>
 

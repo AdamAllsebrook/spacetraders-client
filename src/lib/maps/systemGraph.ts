@@ -8,7 +8,8 @@ export type SystemNode<T = SystemData> = {
     y: number,
     orbitals: Array<SystemNode>,
     label: { x: number, y: number },
-    fixed: boolean
+    fixed: boolean,
+    parent: SystemNode | null,
 };
 
 
@@ -35,6 +36,16 @@ export class SystemGraph {
         return node;
     }
 
+    deleteNode(node: SystemNode) {
+        this.index.delete(node.data.symbol);
+        if (node.parent === null) {
+            this.graph.splice(this.graph.indexOf(node), 1);
+        }
+        else {
+            node.parent.orbitals.splice(node.parent.orbitals.indexOf(node), 1);
+        }
+    }
+
     addWaypoints(waypoints: Array<Waypoint>) {
         const symbolIndex = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, waypoint]));
         const isOrbital = Object.fromEntries(waypoints.map((waypoint) => [waypoint.symbol, false]));
@@ -47,6 +58,17 @@ export class SystemGraph {
             if (isOrbital[waypoint.symbol]) {
                 return;
             }
+            let x = this.scale.x(waypoint.x);
+            let y = this.scale.y(waypoint.y);
+            const parent = this.createNode({
+                data: waypoint,
+                x,
+                y,
+                orbitals: [],
+                label: { x, y },
+                fixed: true,
+                parent: null,
+            }, true);
             const orbitals = waypoint.orbitals.map((orbital, i) => {
                 let x = this.scale.x(waypoint.x) + this.orbitalDistance * Math.cos(this.orbitalTheta * i + this.orbitalThetaOffset);
                 let y = this.scale.y(waypoint.y) + this.orbitalDistance * Math.sin(this.orbitalTheta * i + this.orbitalThetaOffset);
@@ -57,22 +79,15 @@ export class SystemGraph {
                     orbitals: [],
                     label: { x, y },
                     fixed: true,
+                    parent,
                 });
             });
-            let x = this.scale.x(waypoint.x);
-            let y = this.scale.y(waypoint.y);
-            this.createNode({
-                data: waypoint,
-                x,
-                y,
-                orbitals,
-                label: { x, y },
-                fixed: true,
-            }, true);
+            parent.orbitals = orbitals;
         });
     }
 
     addShips(ships: Array<Ship>) {
+        let shipNodes: Array<SystemNode> = [];
         ships.forEach((ship) => {
             const parent = this.index.get(ship.nav.waypointSymbol);
             if (!parent) {
@@ -89,34 +104,44 @@ export class SystemGraph {
                 ship.nav.route.destination.y = dest.y;
                 const x = (dep.x + dest.x) / 2;
                 const y = (dep.y + dest.y) / 2;
-                // const total = Date.parse(ship.nav.route.arrival) - Date.parse(ship.nav.route.departureTime);
-                // const t = (Date.parse(ship.nav.route.arrival) - Date.now()) / total;
-                // const tx = tweened((dest.x - dep.x) * t + dep.x, { duration: (1 - t) * total });
-                // const ty = tweened((dest.y - dep.y) * t + dep.y, { duration: (1 - t) * total });
                 const node = this.createNode({
                     data: ship,
-                    x: x,
-                    y: y,
+                    x,
+                    y,
                     orbitals: [],
-                    label: { x: x, y: y },
+                    label: { x, y },
                     fixed: true,
+                    parent: null,
                 });
                 this.graph.push(node);
+                shipNodes.push(node);
             }
             else {
-                const x = parent.x;// + this.orbitalDistance;
-                const y = parent.y;// + this.orbitalDistance;
+                const x = parent.x;
+                const y = parent.y;
                 const node = this.createNode({
                     data: ship,
-                    x: x,
-                    y: y,
+                    x,
+                    y,
                     orbitals: [],
-                    label: { x: x, y: y },
+                    label: { x, y },
                     fixed: false,
+                    parent,
                 });
                 parent.orbitals.push(node);
+                shipNodes.push(node);
             }
         });
+        return shipNodes;
+    }
+
+    updateShip(ship: Ship) {
+        const node = this.index.get(ship.symbol);
+        if (!node) return;
+        this.deleteNode(node);
+        const [shipNode] = this.addShips([ship]);
+        return shipNode;
+
     }
 
     forEach(callback: (node: SystemNode) => void) {

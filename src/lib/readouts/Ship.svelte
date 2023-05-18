@@ -2,15 +2,23 @@
 	import type { Ship } from '$api';
 	import { FleetApi } from '$api';
 	import { config, popups, mode, resetMap } from '$lib/stores';
-	import { onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { toastStore } from '@skeletonlabs/skeleton';
 	import Floating from '$lib/components/Floating.svelte';
 	import Fleet from './Fleet.svelte';
 	import { stripWaypoint } from '$lib/utils';
+	import type { SystemGraph, SystemNode } from '$lib/maps/systemGraph';
+	import type { Writable } from 'svelte/store';
+    import type { ForceSimulation } from '$lib/maps/forceSimulation';
 
 	export let ship: Ship | string;
     export let anchor: HTMLElement | SVGElement;
 	let data: Ship;
+
+    // let graph: Writable<SystemGraph> = getContext('system-graph');
+    // let simulation: ForceSimulation = getContext('system-simulation');
+    export let graph: Writable<SystemGraph>;
+    export let simulation: ForceSimulation;
 
 	onMount(async () => {
 		if (typeof ship === 'string') {
@@ -63,7 +71,9 @@
                 if (response.data) {
                     data.nav = response.data.nav;
                     toastStore.trigger({ message: `${data.symbol} ${data.nav.flightMode} to ${stripWaypoint(data.nav.route.destination.symbol)}` });
-                    $resetMap();
+
+                    const newShip = $graph.updateShip(data);
+                    if (newShip) simulation.updateNode(newShip);
                 }
             }
         };
