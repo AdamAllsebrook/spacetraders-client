@@ -117,8 +117,13 @@ export class SystemGraph {
                 shipNodes.push(node);
             }
             else {
-                const x = parent.x;
-                const y = parent.y;
+                let x = parent.x;
+                let y = parent.y;
+                if (parent.parent) {
+                    const len = Math.sqrt((parent.x - parent.parent.x) ** 2 + (parent.y - parent.parent.y) ** 2);
+                    x += (parent.x - parent.parent.x) / len * 10;
+                    y += (parent.y - parent.parent.y) / len * 10;
+                }
                 const node = this.createNode({
                     data: ship,
                     x,

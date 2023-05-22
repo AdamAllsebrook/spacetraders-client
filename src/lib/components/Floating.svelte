@@ -26,6 +26,6 @@
     });
 </script>
 
-<div class="absolute w-max" bind:this={float}>
+<div class="floating" bind:this={float}>
 	<slot />
 </div>

@@ -13,20 +13,20 @@
     }
 </script>
 
-<circle 
-    cx={waypoint.x} 
-    cy={waypoint.y} 
-    r={5 + waypoint.orbitals.length} 
-    class="cursor-pointer fill-secondary-50"
+<Label 
+    anchor={waypoint} 
+    pos={waypoint.label} 
+    texts={[`${waypoint.data.type} // ${stripWaypoint(waypoint.data.symbol)}`]} 
     on:click={select} 
     on:keydown={(e) => {
         if (e.key === 'Enter') select();
     }}
 />
-<Label 
-    anchor={waypoint} 
-    pos={waypoint.label} 
-    texts={[`${waypoint.data.type} // ${stripWaypoint(waypoint.data.symbol)}`]} 
+<circle 
+    cx={waypoint.x} 
+    cy={waypoint.y} 
+    r={5 + waypoint.orbitals.length} 
+    class="cursor-pointer fill-secondary-50"
     on:click={select} 
     on:keydown={(e) => {
         if (e.key === 'Enter') select();

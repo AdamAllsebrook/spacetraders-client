@@ -18,8 +18,8 @@ export class ForceSimulation {
     links: Array<{ source: number; target: number }>;
     index: Record<string, ForceNode>;
 
-    nLabelNodes = 3;
-    labelNodeWidth = 25;
+    nLabelNodes = 12;
+    labelNodeWidth = 24;
 
     constructor() {
         this.simulation = d3.forceSimulation()
@@ -48,10 +48,10 @@ export class ForceSimulation {
     createSimulation() {
         this.simulation = d3
             .forceSimulation(this.nodes)
-            .force('charge', d3.forceManyBody().strength(-70).distanceMax(100).distanceMin(5))
+            .force('charge', d3.forceManyBody().strength(-200).distanceMax(100).distanceMin(5))
             .force('collision', d3.forceCollide().radius(1))
             .force('link', d3.forceLink(this.links).distance(40))
-            .alphaDecay(0.1)
+            .alphaDecay(0.25)
             .on('tick', () => this.simulationTick());
     }
 
