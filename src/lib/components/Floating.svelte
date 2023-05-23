@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { computePosition, flip, shift, offset, autoUpdate } from '@floating-ui/dom';
-	import { onDestroy, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+
+    const dispatch = createEventDispatcher();
 
 	export let anchor: HTMLElement | SVGElement;
 	let float: HTMLElement;
@@ -18,6 +20,12 @@
 		});
     }
 
+    function onClick(e: MouseEvent) {
+        if (!float.contains(e.target as Node)) {
+            dispatch('clickout', e);
+        }
+    }
+
 	onMount(() => {
 		cleanup = autoUpdate(anchor, float, updatePosition);
 	});
@@ -26,6 +34,7 @@
     });
 </script>
 
+<svelte:window on:mouseup={onClick} />
 <div class="floating" bind:this={float}>
 	<slot />
 </div>

@@ -91,28 +91,30 @@
 </script>
 
 {#if data}
-    <Floating {anchor}>
-        <div class="variant-glass-surface variant-ringed-secondary rounded-sm p-4">
-            <h3 class="h3">{data.registration.name}</h3>
-            <p>{capitalize(data.registration.role)}</p>
-            <Fuel capacity={data.fuel.capacity} current={data.fuel.current} />
-            <!---->
-            <!-- <p>Cargo</p> -->
-            <!-- {#each data.cargo.inventory as item} -->
-            <!--     <p>{item.name}: {item.units}</p> -->
-            <!-- {/each} -->
-            <!---->
-            <button class="btn bg-gradient-to-br variant-gradient-tertiary-primary" on:click={extract}>
-                Extract
-            </button>
-            {#if data.nav.status !== 'DOCKED'}
-                <button class="btn variant-soft-primary" on:click={dock}>Dock</button>
-            {/if}
-            {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
-                <button class="btn variant-soft-primary" on:click={sellAll}>Sell All</button>
-            {/if}
-            <button class='btn variant-soft-primary' on:click={navigate}>Move</button>
-            <button class='btn variant-soft-primary' on:click={closePopup}>Close</button>
+    <Floating {anchor} on:clickout={closePopup}>
+        <div class="variant-glass-surface variant-ringed-secondary rounded-sm p-4 space-y-4">
+            <div>
+                <h3 class="h3">{data.registration.name}</h3>
+                <p>{capitalize(data.registration.role)}</p>
+                <p>{data.nav.waypointSymbol} - {data.nav.status}</p>
+            </div>
+            <div>
+                <p>&nbsp;Fuel: {(data.fuel.current / data.fuel.capacity * 100).toFixed(0)}% ({data.fuel.current}/{data.fuel.capacity})</p>
+                <p>Cargo: {(data.cargo.units / data.cargo.capacity * 100).toFixed(0)}% ({data.cargo.units}/{data.cargo.capacity})</p>
+            </div>
+            <div class="pt-2">
+                <button class="btn bg-gradient-to-br variant-gradient-tertiary-primary" on:click={extract}>
+                    Extract
+                </button>
+                {#if data.nav.status !== 'DOCKED'}
+                    <button class="btn variant-soft-primary" on:click={dock}>Dock</button>
+                {/if}
+                {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
+                    <button class="btn variant-soft-primary" on:click={sellAll}>Sell All</button>
+                {/if}
+                <button class='btn variant-soft-primary' on:click={navigate}>Move</button>
+                <button class='btn variant-soft-primary' on:click={closePopup}>Close</button>
+            </div>
         </div>
     </Floating>
 {/if}

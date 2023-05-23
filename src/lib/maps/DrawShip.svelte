@@ -16,15 +16,16 @@
     let tx = writable(ship.x);
     let ty = writable(ship.y);
 
-    let lastNav: ShipNav | null = null;
+    let cancel_animations: (() => void)[] = [];
     $: ship.data.nav, animateTransit();
     const simulation: ForceSimulation = getContext('system-simulation');
     const graph: Writable<SystemGraph> = getContext('system-graph');
 
     function animateTransit() {
-        if (inTransit && lastNav !== ship.data.nav) {
-            lastNav = ship.data.nav;
-            animateStore(
+        if (inTransit) {
+            cancel_animations.forEach((cancel) => cancel());
+            cancel_animations = [];
+            cancel_animations.push(animateStore(
                 window, 
                 tx, 
                 ship.data.nav.route.departure.x,
@@ -40,15 +41,15 @@
                         simulation.updateNode(ship);
                     });
                 }
-            );
-            animateStore(
+            ));
+            cancel_animations.push(animateStore(
                 window,
                 ty,
                 ship.data.nav.route.departure.y, 
                 ship.data.nav.route.destination.y, 
                 Date.parse(ship.data.nav.route.departureTime), 
                 Date.parse(ship.data.nav.route.arrival)
-            );
+            ));
         }
     }
 
