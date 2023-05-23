@@ -32,3 +32,7 @@ export function animateStore(window: Window, store: Writable<number>, start: num
     store.set(start);
     window.requestAnimationFrame(step);
 }
+
+export function capitalize(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}

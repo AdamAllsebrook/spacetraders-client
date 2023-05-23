@@ -6,10 +6,11 @@
 	import { toastStore } from '@skeletonlabs/skeleton';
 	import Floating from '$lib/components/Floating.svelte';
 	import Fleet from './Fleet.svelte';
-	import { stripWaypoint } from '$lib/utils';
+	import { stripWaypoint, capitalize } from '$lib/utils';
 	import type { SystemGraph, SystemNode } from '$lib/maps/systemGraph';
 	import type { Writable } from 'svelte/store';
     import type { ForceSimulation } from '$lib/maps/forceSimulation';
+	import Fuel from '$lib/components/Fuel.svelte';
 
 	export let ship: Ship | string;
     export let anchor: HTMLElement | SVGElement;
@@ -85,30 +86,32 @@
             return p;
         });
     }
+
+    console.log(ship);
 </script>
 
 {#if data}
     <Floating {anchor}>
-        <div class="variant-glass-surface variant-ringed-secondary rounded-sm space-y-5 p-4">
-            <h4 class="card-title">{data.registration.name}</h4>
-            <p>{data.registration.role}</p>
-            <p>{data.nav.status} at {data.nav.waypointSymbol}</p>
-
-            <p>Cargo</p>
-            {#each data.cargo.inventory as item}
-                <p>{item.name}: {item.units}</p>
-            {/each}
-
+        <div class="variant-glass-surface variant-ringed-secondary rounded-sm p-4">
+            <h3 class="h3">{data.registration.name}</h3>
+            <p>{capitalize(data.registration.role)}</p>
+            <Fuel capacity={data.fuel.capacity} current={data.fuel.current} />
+            <!---->
+            <!-- <p>Cargo</p> -->
+            <!-- {#each data.cargo.inventory as item} -->
+            <!--     <p>{item.name}: {item.units}</p> -->
+            <!-- {/each} -->
+            <!---->
             <button class="btn bg-gradient-to-br variant-gradient-tertiary-primary" on:click={extract}>
                 Extract
             </button>
             {#if data.nav.status !== 'DOCKED'}
-                <button class="btn variant-glass-primary" on:click={dock}>Dock</button>
+                <button class="btn variant-soft-primary" on:click={dock}>Dock</button>
             {/if}
             {#if data.nav.status === 'DOCKED' && data.cargo.inventory.length > 0}
                 <button class="btn variant-soft-primary" on:click={sellAll}>Sell All</button>
             {/if}
-            <button class='btn variant-glass-primary' on:click={navigate}>Move</button>
+            <button class='btn variant-soft-primary' on:click={navigate}>Move</button>
             <button class='btn variant-soft-primary' on:click={closePopup}>Close</button>
         </div>
     </Floating>
